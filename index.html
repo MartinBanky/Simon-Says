@@ -9,17 +9,17 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 	<script type="text/javascript">
 		let level = 0;
-		let playback = false;
 		let gamePattern = [];
 		let gameStarted = false;
-		let checkingAnswer = false;
+		let notPlayingBack = true;
+		let notCheckingAnswer = true;
 		let randomChosenColor = [];
 		let userClickedPattern = [];
 		const buttonColors = ["red", "blue", "green", "yellow"];
 
 		function init(){
 			$(".btn").click(function(){
-				if(gameStarted && !playback && !checkingAnswer){
+				if(gameStarted && notPlayingBack && notCheckingAnswer){
 					// either one will work
 					// const userChosenColor = this.id;
 					const userChosenColor = $(this).attr("id");
@@ -49,7 +49,7 @@
 		}
 
 		async function nextSequence(){
-			playback = true;
+			notPlayingBack = false;
 
 			if(!gameStarted){
 				gameStarted = true;
@@ -80,7 +80,7 @@
 				playSound(gamePattern[i]);
 			}
 
-			playback = false;
+			notPlayingBack = true;
 
 			console.log("Game Pattern: " + gamePattern.toString());
 		}
@@ -90,7 +90,7 @@
 			console.log("User Click Pattern: " + userClickedPattern.toString());
 			console.log("");
 
-			checkingAnswer = true;
+			notCheckingAnswer = false;
 
 			const index = userClickedPattern.length - 1;
 
@@ -112,7 +112,7 @@
 				$(document).one("keypress", nextSequence);
 			}
 
-			checkingAnswer = false;
+			notCheckingAnswer = true;
 		}
 
 		function playSound(name){
