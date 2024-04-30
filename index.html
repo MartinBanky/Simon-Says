@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+	<meta charset="utf-8">
+	<title>Simon</title>
+	<link rel="stylesheet" href="styles.css">
+	<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		let level = 0;
+		let playback = false;
+		let gamePattern = [];
+		let gameStarted = false;
+		let checkingAnswer = false;
+		let randomChosenColor = [];
+		let userClickedPattern = [];
+		const buttonColors = ["red", "blue", "green", "yellow"];
+
+		function init(){
+			$(".btn").click(function(){
+				if(gameStarted && !playback && !checkingAnswer){
+					// either one will work
+					// const userChosenColor = this.id;
+					const userChosenColor = $(this).attr("id");
+					userClickedPattern.push(userChosenColor);
+					
+					playSound(userChosenColor);
+					animatePress(userChosenColor);
+					checkAnswer();
+
+					/*
+						Another way of doing the animatePress function.
+						You have to grab the pressed button in order for
+						the setTimeout function to work.
+					*/
+					// const pressedButton = $(this);
+
+					// pressedButton.addClass("pressed");
+
+					// setTimeout(function(){
+					// 	pressedButton.removeClass("pressed");
+					// }, 100);
+				}
+			});
+
+			// One shot event Listener
+			$(document).one("keypress", nextSequence);
+		}
+
+		async function nextSequence(){
+			playback = true;
+
+			if(!gameStarted){
+				gameStarted = true;
+			}
+
+			$("#level-title").text("Level " + level);
+			++level;
+
+			/* Comment the next 3 lines for a new pattern each time */
+			const randomNumber = Math.floor(Math.random() * 4);
+			const randomChosenColor = buttonColors[randomNumber];
+			gamePattern.push(randomChosenColor);
+
+			// $("#" + randomChosenColor).fadeOut(100).fadeIn(100);
+			// playSound(randomChosenColor);
+
+			/* Uncomment the for loop for a new pattern each time */
+			// for(let i = 0; i < level; ++i){
+			// 	gamePattern.push(buttonColors[Math.floor(Math.random() * 4)]);
+			// }
+
+			/*
+				This is like the original Simon Says game.
+			*/
+			for(let i = 0; i < gamePattern.length; ++i){
+				await new Promise(resolve => setTimeout(resolve, 500));
+				$("#" + gamePattern[i]).fadeOut(100).fadeIn(100);
+				playSound(gamePattern[i]);
+			}
+
+			playback = false;
+
+			console.log("Game Pattern: " + gamePattern.toString());
+		}
+
+		function checkAnswer(){
+			console.log("Game Pattern: " + gamePattern.toString());
+			console.log("User Click Pattern: " + userClickedPattern.toString());
+			console.log("");
+
+			checkingAnswer = true;
+
+			const index = userClickedPattern.length - 1;
+
+			if(userClickedPattern[index] === gamePattern[index]){
+				if(userClickedPattern.length === gamePattern.length){
+					/* Uncomment the next line for a new pattern each time */
+					// gamePattern = [];
+					userClickedPattern = [];
+					setTimeout(nextSequence, 750);
+				}
+			}else{
+				level = 0;
+				gameOver();
+				gamePattern = [];
+				playSound("wrong");
+				gameStarted = false;
+				userClickedPattern = [];
+				$("h1").text("Game Over, Press Any Key to Restart");
+				$(document).one("keypress", nextSequence);
+			}
+
+			checkingAnswer = false;
+		}
+
+		function playSound(name){
+			const audio = new Audio("sounds/" + name + ".mp3");
+			audio.play();
+		}
+
+		function animatePress(currentColor){
+			$("#" + currentColor).addClass("pressed");
+			
+			setTimeout(function(){
+				$("#" + currentColor).removeClass("pressed");
+			}, 100);
+		}
+
+		function gameOver(){
+			$("body").addClass("game-over");
+			
+			setTimeout(function(){
+				$("body").removeClass("game-over");
+			}, 200);
+		}
+	</script>
+</head>
+
+<body onload="init();">
+	<h1 id="level-title">Press A Key to Start</h1>
+	<div class="container">
+		<div class="row">
+
+			<div type="button" id="green" class="btn green">
+
+			</div>
+
+			<div type="button" id="red" class="btn red">
+
+			</div>
+		</div>
+
+		<div class="row">
+
+			<div type="button" id="yellow" class="btn yellow">
+
+			</div>
+			<div type="button" id="blue" class="btn blue">
+
+			</div>
+
+		</div>
+
+	</div>
+</body>
+
+</html>
